@@ -6,17 +6,34 @@ const forecast = (latitude, longitude, callback) => {
   
     request({url, json:true}, (error, {body}) => {
       const {temperature, precipProbability} = body.currently;
-      const {summary} = body.daily.data[0];
-
+      const {summary, temperatureMin, temperatureMinTime, temperatureMax, temperatureMaxTime} = body.daily.data[0];
+      
       if(error) {
         callback('Unable to connect to weather service');
       }else if(body.error) {
         callback('Unable to find the location');
       }else{
-        const rainProbability =  precipProbability * 100.00;
-        callback(undefined,`${summary}. It is currently ${temperature} degrees out. There is a ${rainProbability}% chance of rain.`);
+        const dateMax = new Date(temperatureMaxTime * 1000);
+        const dateMin = new Date(temperatureMinTime * 1000);
+        const message = `${summary} `+ 
+                        `It is currently ${temperature} degrees out. `+
+                        `The highest today is at ${temperatureMax} (${formatTime(dateMax)}) and lowest at ${temperatureMin} (${formatTime(dateMin)}). `+
+                        `There is a ${precipProbability * 100.00}% chance of rain.`;
+        callback(undefined,message);
       }
     });
   };
+
+  const formatTime = (date) => {
+    let hours = date.getHours();
+    let ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours > 0 ? hours : 12;
+    let minutes = date.getMinutes();
+    minutes = minutes < 10 ? '0'+minutes : minutes;
+    let formattedTime = hours + ':' + minutes + ' ' + ampm;
+    return formattedTime;
+  }
+
   
   module.exports = forecast;
