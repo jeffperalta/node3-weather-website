@@ -5,7 +5,7 @@ const forecast = (latitude, longitude, callback) => {
                +'?units=si&lang=en';
   
     request({url, json:true}, (error, {body}) => {
-      const {temperature, precipProbability: rainProbability} = body.currently;
+      const {temperature, precipProbability} = body.currently;
       const {summary} = body.daily.data[0];
 
       if(error) {
@@ -13,6 +13,7 @@ const forecast = (latitude, longitude, callback) => {
       }else if(body.error) {
         callback('Unable to find the location');
       }else{
+        const rainProbability =  precipProbability * 100.00;
         callback(undefined,`${summary}. It is currently ${temperature} degrees out. There is a ${rainProbability}% chance of rain.`);
       }
     });
